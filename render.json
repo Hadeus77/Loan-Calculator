@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pip install --upgrade pip && pip install -r requirements.txt",
+  "env": "python",
+  "plan": "free",
+  "pythonVersion": "3.10"
+}
