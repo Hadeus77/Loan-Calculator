@@ -117,6 +117,7 @@ async def calculate_loan(request: dict):
             "total_interest": round(total_interest, 2),
             "total_payments": total_payments,
             "payment_plan": payment_plan
+        }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
