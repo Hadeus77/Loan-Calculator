@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .loan-calculator {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .clear-btn {
+            background: #f0f0f0;
+            color: #333;
+            padding: 12px 20px;
+        }
+
+        .clear-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .loan-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .payment-plan {
+            margin-top: 25px;
+        }
+
+        .payment-plan h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        .currency {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .loan-calculator {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .loan-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="loan-calculator">
+            <div class="title">Loan Calculator</div>
+
+            <div class="error" id="errorDisplay"></div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="loanAmount">Loan Amount ($)</label>
+                    <input type="number" id="loanAmount" placeholder="100000" min="1" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="interestRate">Annual Interest Rate (%)</label>
+                    <input type="number" id="interestRate" placeholder="5.5" min="0" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="numYears">Loan Term (Years)</label>
+                    <input type="number" id="numYears" placeholder="30" min="1" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="startDate">Loan Start Date</label>
+                    <input type="date" id="startDate">
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentFrequency">Payment Frequency</label>
+                    <select id="paymentFrequency">
+                        <option value="monthly">Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="calculate-btn" onclick="calculateLoan()">Calculate Loan Terms</button>
+                <button class="clear-btn" onclick="clearForm()">Clear</button>
+            </div>
+
+            <div class="results-section" id="resultsSection">
+                <div class="loan-summary" id="loanSummary"></div>
+
+                <div class="payment-plan">
+                    <h3>Payment Plan</h3>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Payment #</th>
+                                    <th>Payment Date</th>
+                                    <th>Payment Amount</th>
+                                    <th>Principal</th>
+                                    <th>Interest</th>
+                                    <th>Remaining Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set today's date as default
+        document.getElementById('startDate').valueAsDate = new Date();
+
+        async function calculateLoan() {
+            const errorDisplay = document.getElementById('errorDisplay');
+            errorDisplay.classList.remove('show');
+            errorDisplay.textContent = '';
+
+            // Get form values
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value);
+            const numYears = parseInt(document.getElementById('numYears').value);
+            const startDate = document.getElementById('startDate').value;
+            const paymentFrequency = document.getElementById('paymentFrequency').value;
+
+            // Validate inputs
+            if (!loanAmount || loanAmount <= 0) {
+                showError('Please enter a valid loan amount');
+                return;
+            }
+            if (interestRate < 0) {
+                showError('Please enter a valid interest rate');
+                return;
+            }
+            if (!numYears || numYears <= 0) {
+                showError('Please enter a valid number of years');
+                return;
+            }
+            if (!startDate) {
+                showError('Please select a start date');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/loan-calc', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        loan_amount: loanAmount,
+                        annual_interest_rate: interestRate,
+                        num_years: numYears,
+                        start_date: startDate,
+                        payment_frequency: paymentFrequency
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Calculation error');
+                }
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+
+        function displayResults(data) {
+            // Calculate end date
+            const startDate = new Date(data.start_date);
+            const endDate = new Date(data.end_date);
+
+           // Build payment frequency label
+            const freqLabel = data.payment_frequency === 'monthly' ? 'Monthly' : 'Quarterly';
+
+            // Display summary
+            const summaryHTML = `
+                <div class="summary-item">
+                    <div class="summary-label">Loan Amount</div>
+                    <div class="summary-value">$${data.loan_amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Interest Rate</div>
+                    <div class="summary-value">${data.annual_interest_rate}%</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Loan Term</div>
+                    <div class="summary-value">${data.num_years} year${data.num_years !== 1 ? 's' : ''}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Interest</div>
+                    <div class="summary-value">$${data.total_interest.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Start Date</div>
+                    <div class="summary-value">${data.start_date}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">End Date</div>
+                    <div class="summary-value">${data.end_date}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Payment Frequency</div>
+                    <div class="summary-value">${freqLabel}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Payments</div>
+                    <div class="summary-value">${data.total_payments}</div>
+                </div>
+            `;
+            document.getElementById('loanSummary').innerHTML = summaryHTML;
+
+            // Display payment plan table
+            let tableHTML = '';
+            data.payment_plan.forEach(payment => {
+                tableHTML += `
+                    <tr>
+                        <td>${payment.payment_number}</td>
+                        <td>${payment.payment_date}</td>
+                        <td class="currency">$${payment.payment_amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="currency">$${payment.principal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="currency">$${payment.interest.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="currency">$${payment.remaining_balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('paymentTableBody').innerHTML = tableHTML;
+
+            // Show results section
+            document.getElementById('resultsSection').classList.add('show');
+        }
+
+        function showError(message) {
+            const errorDisplay = document.getElementById('errorDisplay');
+            errorDisplay.textContent = message;
+            errorDisplay.classList.add('show');
+            document.getElementById('resultsSection').classList.remove('show');
+        }
+
+        function clearForm() {
+            document.getElementById('loanAmount').value = '';
+            document.getElementById('interestRate').value = '';
+            document.getElementById('numYears').value = '';
+            document.getElementById('startDate').valueAsDate = new Date();
+            document.getElementById('paymentFrequency').value = 'monthly';
+            document.getElementById('errorDisplay').classList.remove('show');
+            document.getElementById('resultsSection').classList.remove('show');
+        }
+    </script>
+</body>
+</html>
